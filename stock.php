@@ -2,41 +2,59 @@
     include_once 'Header.php';
     include_once 'includes/db.inc.php';
 ?>
+<div class="container my-5">
+  <table class="table table-striped table-hover">
+  <thead class="table-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Nom</th>
+      <th scope="col">Unit price</th>
+      <th scope="col">Quatity</th>
+      <th scope="col">Category</th>
+    </tr>
+  </thead>
 
-    <style>
-        table, th, td {
-            border: 1px solid black;
-            border-collapse: collapse;
-        }
-    </style>
+  <tbody>
+   
+    <?php
+    $sql_request = "SELECT * FROM article;";
+    $result      = mysqli_query($connect, $sql_request);
+    while ($row = mysqli_fetch_assoc($result)) {
+      $id       = $row['Id'];
+      $name     = $row['Article Name'];
+      $price    = $row['Unit Price'];
+      $quantity = $row['Quantity'];
+      $category = $row['Category'];
+      echo ' <tr>
+      <th scope="row">'.$id.'</th>
+      <td>'.$name.'</td>
+      <td>'.$price.'</td>
+      <td>'.$quantity.'</td>
+      <td>'.$category.'</td>
+    </tr>';
+    }
+    ?>
+</div>
 
-            <?php
-                $sql = "SELECT Nom_article,quatite FROM article";
-                $result = mysqli_query($connect, $sql);
-                while($row = mysqli_fetch_array($result)){
-                    echo $row['Nom_article'];
-                    echo $row['quatite'];
-                }
-                    
-            ?>
-    <table >
-        <tr>
-            <th>Nom de l'article</th>    
-            <th>Quatite disponible</th>
-        </tr>
-        
-        <?php
-            $sql = "SELECT Nom_article,quatite FROM article";
-            $result = mysqli_query($connect, $sql);
-            while($row = mysqli_fetch_array($result)){
-                ?>
-                <tr>
-                    <td> <?php echo $row['Nom_article']?></td>
-                    <td> <?php echo $row['quatite']?></td>
-                </tr>
-                
-                
-            <?php } ?>
-        
-    </table>
+    <!--
+    <tr>
+      <th scope="row">1</th>
+      <td>Mark</td>
+      <td>Otto</td>
+      <td>@mdo</td>
+    </tr>
+    <tr>
+      <th scope="row">2</th>
+      <td>Jacob</td>
+      <td>Thornton</td>
+      <td>@fat</td>
+    </tr>
+    <tr>
+      <th scope="row">3</th>
+      <td>Larry</td>
+      <td>the Bird</td>
+      <td>@twitter</td>
+    </tr>-->
+  </tbody>
+</table>
 

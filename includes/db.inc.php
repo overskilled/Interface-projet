@@ -3,14 +3,13 @@
 $serverName = "localhost";
 $dBUsername = "root";
 $dBPassword = "";
-$dBName = "projet uml";
+$dBName = "stock management";
 
 $connect = mysqli_connect($serverName, $dBUsername, $dBPassword, $dBName);
 
-if (!$connect){
+if (!$connect) {
     die("Connection Failed: ". mysqli_connect_error());
 }
 
 
-?>
 
