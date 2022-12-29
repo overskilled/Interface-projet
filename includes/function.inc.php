@@ -53,18 +53,15 @@ function emailExist($connect, $email)
 
     $resultData = mysqli_stmt_get_result($stmt);
     if ($row = mysqli_fetch_assoc($resultData)) {
-        if ($row !== null) {
-            $result = true;
-        }
+        return $row;
     }else {
-        $result = false;
+        return $result = false;
     }
-    return $result;
 }
 
 
 //add a new manager
-function  addManager($connect, $name, $email, $pwd, $tel, $address)
+function addManager($connect, $name, $email, $pwd, $tel, $address)
 {
     $sql_request = "INSERT INTO manager (Name, Email, Password, Telephone, Address) VALUES (?, ?, ?, ?, ?);";
     $stmt        = mysqli_stmt_init($connect);
@@ -73,7 +70,9 @@ function  addManager($connect, $name, $email, $pwd, $tel, $address)
         exit();
     }
 
-    mysqli_stmt_bind_param($stmt, "sssss", $name, $email, $pwd, $tel, $address);
+    $hashedPwd = password_hash($pwd, PASSWORD_DEFAULT);
+
+    mysqli_stmt_bind_param($stmt, "sssis", $name, $email, $hashedPwd, $tel, $address);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
     header("location: ../views/signup.php?error=signupsuccessful");
@@ -84,30 +83,39 @@ function  addManager($connect, $name, $email, $pwd, $tel, $address)
 
 
 
-//add new client to store
-function Addclient($connect, $nom, $prenom, $tel, $address)
+//check for empty fields in login form
+function loginFormEmpty($email, $pwd)
 {
-    $sql      = "INSERT INTO client (Nom, Prenom, Telephone, addresse) VALUE (?, ?, ?, ?);";
-    $statment = mysqli_stmt_init($connect);
+    $result;
+    if (empty($email) || empty($pwd)) {
+        $result = true;
+    }else {
+        $result = false;
+    }
+    return $result;
+}
 
-    //check if the statement doesm't succeed
-    if (!mysqli_stmt_prepare($statment, $sql)) {
-        header("location: ../client.php?error=statamentfailed");
+function loginManager($connect, $email, $pwd) {
+    $emailExists = emailExist($connect, $email);
+
+    if ($emailExists === false) {
+        header("location: ../views/login.php?error=wronglogin");
         exit();
     }
 
+    $hashedPwd = $emailExists['Password'];
+    $checkpwd  = password_verify($pwd, $hashedPwd);
 
-    mysqli_stmt_bind_param($statment, "ssis",  $nom, $prenom, $tel, $address);
-    mysqli_stmt_execute($statment);
-    mysqli_stmt_close($statment);
+    if ($checkpwd === false) {
+        header("location: ../views/login.php?error=incorrectpassword");
+        exit();
+    }elseif ($checkpwd === true) {
+        session_start();
+        $_SESSION['Id']    = $emailExists['Id'];
+        $_SESSION['email'] = $emailExists['Email'];
+        $_SESSION['name']  = $emailExists['Name'];
+        header("location: ../views/login.php?error=none");
+    }
 
-    header("location: ../index.php?error=none");
-    exit();
 }
-
-
-
- 
-        
-    
     
