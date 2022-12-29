@@ -1,4 +1,7 @@
+<?php
+    session_start();
 
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,11 +21,20 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
                 <div class="navbar-nav ">
-                <a class="nav-item nav-link active" href="stock.php">login<span class="sr-only">(current)</span></a>
-                <a class="nav-item nav-link active" href="signup.php">SignUp<span class="sr-only">(current)</span></a>
+                    <?php
+                        if (isset($_SESSION['Id'])) {
+                            echo    '<a class="nav-item nav-link active" href="stock.php">Stock<span class="sr-only">(current)</span></a>
+                                    <a class="nav-item nav-link active" href="signout.php">Signout<span class="sr-only">(current)</span></a>';
+                        }else {
+                            echo '
+                            <a class="nav-item nav-link active" href="login.php">Login<span class="sr-only">(current)</span></a>
+                            <a class="nav-item nav-link active" href="signup.php">SignUp<span class="sr-only">(current)</span></a>';
+                        }
+                    
+                    ?>
                 </div>
             </div>
-</nav>
+        </nav>
     </div>
     
 </body>
