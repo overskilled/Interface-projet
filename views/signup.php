@@ -10,15 +10,15 @@
     $tel        = $_POST['tel'];
     $address    = $_POST['address'];
 
-    include_once '..\includes\db.inc.php';
-    include_once "..\includes\Function.inc.php";
+    require_once "..\includes\db.inc.php";
+    require_once "..\includes\Function.inc.php";
 
     if (signupFormEmpty($name, $email, $tel, $address, $pwd, $pwdRepeat) !== false) {
         header("location: ../views/signup.php?error=emptyinput");
         exit();
     }
 
-    if (invaidEmail($email) !== false){
+    if (invaidEmail($email) !== false) {
       header("location: ../views/signup.php?error=invalidemail");
       exit();
     }
@@ -37,8 +37,33 @@
 
   }
 
+
 ?>
+
 <div class="container my-5">
+
+  <h1 class="text-center">Sign Up</h1><br>
+
+  <?php
+  $po = '<p class="text-center text-primary font-weight-bold">';
+  $pc = '</p>';
+
+  if (isset($_GET['error'])) {
+    if ($_GET['error'] == "emptyinput") {
+      echo $po."Fill in all fields".$pc;
+    }elseif ($_GET['error'] == "invalidemail") {
+      echo $po."Please fill in email with proper format".$pc;
+    }elseif ($_GET['error'] == "password-don't-match") {
+      echo $po."Password do not match".$pc;
+    }elseif ($_GET['error'] == "emailExist") {
+      echo $po."Email already been used".$pc;
+    }elseif ($_GET['error'] == "signupsuccessful") {
+      header("location: ../views/login.php");
+    }
+
+  }
+  ?>
+
     <form method="post">
     <div class="form-group">
     <label for="exampleInputEmail1"><b>Name</b></label>
@@ -64,7 +89,12 @@
     <label for="exampleInputPassword1"><b>Confirm password</b></label>
     <input type="password" class="form-control" id="exampleInputPassword1" name="cfrm-pwd" placeholder="Enter your password" autocomplete="off">
   </div>
-
-  <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+  <div class="text-center">
+    <p>You already have an account? <a href="login.php">Login</a></p>
+    <button type="submit" class="btn btn-primary" name="submit">SignUp</button>
+  </div>
+  
 </form>
+
+
 </div>
