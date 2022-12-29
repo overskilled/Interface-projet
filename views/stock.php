@@ -1,6 +1,7 @@
 <?php
     include_once 'Header.php';
     include_once '..\includes\db.inc.php';
+    session_start();
 ?>
 <div class="container my-5">
   <table class="table table-striped table-hover">
