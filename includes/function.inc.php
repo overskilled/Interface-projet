@@ -1,93 +1,121 @@
 <?php
 
-function AjouterClient($connect, $nom, $prenom, $tel, $address){
-    $sql      = "INSERT INTO client (Nom, Prenom, Telephone, addresse) VALUE (?, ?, ?, ?);";
-    $statment = mysqli_stmt_init($connect);
+include_once '..\includes\db.inc.php';
+//finction to check if a field in the form is empty
+function signupFormEmpty($name, $email, $tel, $address, $pwd, $pwdRepeat)
+{
+    $result;
+    if (empty($name) || empty($email) || empty($tel) || empty($address) || empty($pwd) || empty($pwdRepeat)) {
+        $result = true;
+    }else {
+        $result = false;
+    }
+    return $result;
+}
 
-    //check if the statement doesm't succeed
-    if (!mysqli_stmt_prepare($statment, $sql)) {
-        header("location: ../client.php?error=statamentfailed");
+//Check if the email format is correct
+function invaidEmail($email)
+{
+    $result;
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $result = true;
+    }else {
+        $result = false;
+    }
+    return $result;
+}
+
+//check is the password mathches the confirm password
+function pwdMatch($pwd, $pwdRepeat)
+{
+    $result;
+    if ($pwd !== $pwdRepeat) {
+        $result = true;
+    }else {
+        $result = false;
+    }
+    return $result;
+}
+
+//check if email has already been registered
+function emailExist($connect, $email)
+{
+    $result;
+    $sql_request = "SELECT * FROM manager WHERE Email = ?;";
+    $stmt        = mysqli_stmt_init($connect);
+    if (!mysqli_stmt_prepare($stmt, $sql_request)) {
+        header("location: ../views/signup,php?error=StmtFailed");
         exit();
     }
 
+    mysqli_stmt_bind_param($stmt, "s", $email);
+    mysqli_stmt_execute($stmt);
 
-    mysqli_stmt_bind_param($statment, "ssis",  $nom, $prenom, $tel, $address);
-    mysqli_stmt_execute($statment);
-    mysqli_stmt_close($statment);
-
-    header("location: ../index.php?error=none");
-    exit();
+    $resultData = mysqli_stmt_get_result($stmt);
+    if ($row = mysqli_fetch_assoc($resultData)) {
+        return $row;
+    }else {
+        return $result = false;
+    }
 }
 
-function AjouterFournisseur($connect, $nom, $prenom, $tel, $address){
-    $sql      = "INSERT INTO fournisseur (Nom, Prenom, Telephone, addresse) VALUE (?, ?, ?, ?);";
-    $statment = mysqli_stmt_init($connect);
 
-    //check if the statement doesm't succeed
-    if (!mysqli_stmt_prepare($statment, $sql)) {
-        header("location: ../client.php?error=statamentfailed");
+//add a new manager
+function addManager($connect, $name, $email, $pwd, $tel, $address)
+{
+    $sql_request = "INSERT INTO manager (Name, Email, Password, Telephone, Address) VALUES (?, ?, ?, ?, ?);";
+    $stmt        = mysqli_stmt_init($connect);
+    if (!mysqli_stmt_prepare($stmt, $sql_request)) {
+        header("location: ../views/signup.php?error=statamentfailed");
         exit();
     }
 
+    $hashedPwd = password_hash($pwd, PASSWORD_DEFAULT);
 
-    mysqli_stmt_bind_param($statment, "ssis",  $nom, $prenom, $tel, $address);
-    mysqli_stmt_execute($statment);
-    mysqli_stmt_close($statment);
-
-    header("location: ../index.php?error=none");
+    mysqli_stmt_bind_param($stmt, "sssis", $name, $email, $hashedPwd, $tel, $address);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+    header("location: ../views/signup.php?error=signupsuccessful");
     exit();
 }
 
-function AjouterArticle($connect, $nom_article, $prix, $quatite, $categorie, $date_fab, $date_exp){
-    $sql      = "INSERT INTO article (Nom_article, Prix_unitaire, Quatite, Categorie, Date_fabrication, Date_expiration) VALUE (?, ?, ?, ?, ?, ?);";
-    $statment = mysqli_stmt_init($connect);
 
-    //check if the statement doesn't succeed
-    if (!mysqli_stmt_prepare($statment, $sql)) {
-        header("location: ../article.php?error=statamentfailed");
+
+
+
+//check for empty fields in login form
+function loginFormEmpty($email, $pwd)
+{
+    $result;
+    if (empty($email) || empty($pwd)) {
+        $result = true;
+    }else {
+        $result = false;
+    }
+    return $result;
+}
+
+function loginManager($connect, $email, $pwd) {
+    $emailExists = emailExist($connect, $email);
+
+    if ($emailExists === false) {
+        header("location: ../views/login.php?error=wronglogin");
         exit();
     }
 
+    $hashedPwd = $emailExists['Password'];
+    $checkpwd  = password_verify($pwd, $hashedPwd);
 
-    mysqli_stmt_bind_param($statment, "siisss",  $nom_article, $prix, $quatite, $categorie, $date_fab, $date_exp);
-    mysqli_stmt_execute($statment);
-    mysqli_stmt_close($statment);
-
-    header("location: ../index.php?error=none");
-    exit();
-}
-
-function CommandeArticle($connect, $article, $fournisseur, $quatite, $prix, $date){
-    $sql      = "INSERT INTO commande (id_article, id_fournisseur, quatite, prix, date_commande) VALUE (?, ?, ?, ?, ?);";
-    $statment = mysqli_stmt_init($connect);
-
-    //check if the statement doesn't succeed
-    if (!mysqli_stmt_prepare($statment, $sql)) {
-        header("location: ../article.php?error=statamentfailed");
+    if ($checkpwd === false) {
+        header("location: ../views/login.php?error=incorrectpassword");
         exit();
+    }elseif ($checkpwd === true) {
+        session_start();
+        $_SESSION['Id']    = $emailExists['Id'];
+        $_SESSION['email'] = $emailExists['Email'];
+        $_SESSION['name']  = $emailExists['Name'];
+        header("location: ../views/login.php?error=none");
     }
 
-
-    mysqli_stmt_bind_param($statment, "iiiis",  $article, $fournisseur, $quatite, $prix, $date);
-    mysqli_stmt_execute($statment);
-    mysqli_stmt_close($statment);
-
-    header("location: ../index.php?error=none");
-    exit();
 }
-
-Function Livrer($connect, $article, $quatite){
-    $new_quantite;
-    $sql = "SELECT id_article,quatite FROM article";
-    $result = mysqli_query($connect, $sql);
-    while($row = mysqli_fetch_array($result)){
-        if($row['id_article'] == $quatite){
-            $new_quantite = $row['quatite'] + $quatite;
-        }
-    }
-
     
-        
-    
-    
-}
